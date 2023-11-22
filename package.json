@@ -10,10 +10,9 @@
     "graphile-migrate": "^1.4.1"
   },
   "scripts": {
-    "install": "node ./build.js"
+    "build": "node ./build.js"
   },
   "bin": {
     "graphile-migrate": "./dist/index.js"
-  },
-  "packageManager": "yarn@4.0.0-rc.45"
+  }
 }

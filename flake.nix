@@ -1,29 +1,30 @@
 {
   inputs = {
     nixpkgs.url = github:nixos/nixpkgs/release-23.05;
-    utils.url = github:gytis-ivaskevicius/flake-utils-plus;
-    yarnpnp2nix.url = github:madjam002/yarnpnp2nix;
-    yarnpnp2nix.inputs.nixpkgs.follows = "nixpkgs";
-    yarnpnp2nix.inputs.utils.follows = "utils";
+    npmlock2nix.url = github:nix-community/npmlock2nix;
   };
 
-  outputs = inputs@{ self, nixpkgs, utils, yarnpnp2nix }: let
+  outputs = inputs@{ self, nixpkgs, npmlock2nix }: let
     pkgs = import nixpkgs {
       system = "x86_64-linux";
-      overlays = [ self.overlays.default ];
+      overlays = [
+        (final: prev: {
+          npmlock2nix = import npmlock2nix {pkgs = prev;};
+        })
+      ];
+      config = {
+        permittedInsecurePackages = [
+          "nodejs-16.20.2"
+        ];
+      };
     };
   in rec {
-    packages.x86_64-linux = let
-      yarnPackages = yarnpnp2nix.lib.x86_64-linux.mkYarnPackagesFromManifest {
-        inherit pkgs;
-        yarnManifest = import ./yarn-manifest.nix;
+    packages.x86_64-linux = {
+      graphile-migrate = pkgs.npmlock2nix.v2.build {
+        src = ./.;
+        installPhase = "mkdir -p $out/bin && cp dist/index.js $out/bin/graphile-migrate";
+        buildCommands = [ "npm run build" ];
       };
-    in {
-      graphile-migrate = yarnPackages."graphile-migrate-flake@workspace:.";
-    };
-
-    overlays.default = self: super: {
-      inherit (packages) graphile-migrate;
     };
   };
 }
