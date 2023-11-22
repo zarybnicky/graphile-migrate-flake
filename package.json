@@ -1,0 +1,19 @@
+{
+  "name": "graphile-migrate-flake",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:zarybnicky/graphile-migrate-flake.git",
+  "author": "Jakub Zárybnický <jakub@zarybnicky.com>",
+  "license": "MIT",
+  "dependencies": {
+    "esbuild": "^0.19.7",
+    "graphile-migrate": "^1.4.1"
+  },
+  "scripts": {
+    "install": "node ./build.js"
+  },
+  "bin": {
+    "graphile-migrate": "./dist/index.js"
+  },
+  "packageManager": "yarn@4.0.0-rc.45"
+}
