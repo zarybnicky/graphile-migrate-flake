@@ -26,5 +26,9 @@
         buildCommands = [ "npm run build" ];
       };
     };
+
+    overlays.default = final: prev: {
+      inherit (packages.x86_64-linux) graphile-migrate;
+    };
   };
 }
