@@ -5,8 +5,9 @@
   };
 
   outputs = inputs@{ self, nixpkgs, npmlock2nix }: let
-    pkgs = import nixpkgs {
-      system = "x86_64-linux";
+    forAllSystems = fn: nixpkgs.lib.genAttrs [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ] (system: fn (import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
       overlays = [
         (final: prev: {
           npmlock2nix = import npmlock2nix {pkgs = prev;};
@@ -17,18 +18,19 @@
           "nodejs-16.20.2"
         ];
       };
-    };
+    }));
+
   in rec {
-    packages.x86_64-linux = {
+    packages = forAllSystems (pkgs: {
       graphile-migrate = pkgs.npmlock2nix.v2.build {
         src = ./.;
         installPhase = "mkdir -p $out/bin && cp dist/index.js $out/bin/graphile-migrate";
         buildCommands = [ "npm run build" ];
       };
-    };
+    });
 
     overlays.default = final: prev: {
-      inherit (packages.x86_64-linux) graphile-migrate;
+      inherit (self.packages.${final.system}) graphile-migrate;
     };
   };
 }
